@@ -1,0 +1,16 @@
+{
+  "description": "Allow permission requests only while the user-controlled switch is enabled.",
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${PLUGIN_ROOT}/scripts/auto_approve.py\" hook",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

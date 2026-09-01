@@ -1,0 +1,6 @@
+interface:
+  display_name: "Auto Approve"
+  short_description: "Toggle automatic Codex permission approvals"
+  default_prompt: "Use $auto-approve to show or change automatic approval status."
+policy:
+  allow_implicit_invocation: false

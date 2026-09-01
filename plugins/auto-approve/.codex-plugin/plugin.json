@@ -1,0 +1,34 @@
+{
+  "name": "auto-approve",
+  "version": "0.1.0",
+  "description": "Explicitly toggle automatic approval for supported Codex permission requests.",
+  "author": {
+    "name": "fuliucansheng",
+    "email": "fuliucansheng@gmail.com",
+    "url": "https://github.com/fuliucansheng"
+  },
+  "homepage": "https://github.com/fuliucansheng/codex-auto-approve#readme",
+  "repository": "https://github.com/fuliucansheng/codex-auto-approve",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "plugin",
+    "permissions",
+    "automation"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Auto Approve",
+    "shortDescription": "Toggle automatic approvals from Codex.",
+    "longDescription": "Auto Approve allows supported Codex PermissionRequest events only while its explicit local switch is enabled. Control it inside Codex with the bundled $auto-approve skill.",
+    "developerName": "fuliucansheng",
+    "category": "Productivity",
+    "capabilities": [
+      "Approve"
+    ],
+    "websiteURL": "https://github.com/fuliucansheng/codex-auto-approve",
+    "defaultPrompt": [
+      "Use $auto-approve status to show the current automatic approval status."
+    ]
+  }
+}
