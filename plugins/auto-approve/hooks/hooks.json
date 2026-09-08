@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${PLUGIN_ROOT}/scripts/auto_approve.py\" hook",
+            "command": "node \"${PLUGIN_ROOT}/scripts/auto_approve.js\" hook",
             "timeout": 5
           }
         ]
