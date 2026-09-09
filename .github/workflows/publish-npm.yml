@@ -1,0 +1,54 @@
+name: Publish npm
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.event.release.prerelease == false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ github.event.release.tag_name }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org/
+      - name: Install npm with trusted publishing support
+        run: npm install --global npm@11.6.2
+      - name: Verify release tag and manifest versions
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: node scripts/validate-release-version.mjs "$RELEASE_TAG"
+      - run: npm ci
+      - run: npm run build
+      - run: npm run typecheck
+      - name: Test and retain the npm tarball
+        env:
+          NPM_TEST_PACK_DESTINATION: ${{ runner.temp }}/npm-package
+        run: npm test
+      - name: Check generated artifact drift and whitespace
+        run: |
+          git ls-files --error-unmatch plugins/auto-approve/scripts/auto_approve.js
+          git diff --exit-code -- plugins/auto-approve/scripts/auto_approve.js
+          git diff --check
+      - name: Publish the tested tarball
+        env:
+          # Optional first-publication bootstrap. Empty uses npm OIDC.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          tarballs=("$RUNNER_TEMP"/npm-package/*.tgz)
+          test "${#tarballs[@]}" -eq 1
+          test -f "${tarballs[0]}"
+          npm publish "${tarballs[0]}" --ignore-scripts --access public --provenance

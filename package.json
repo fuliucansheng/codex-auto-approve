@@ -1,0 +1,50 @@
+{
+  "name": "codex-auto-approve",
+  "version": "0.1.1",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node scripts/test.mjs",
+    "prepack": "npm run build",
+    "validate:release": "node scripts/validate-release-version.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "typescript": "~5.9.3"
+  },
+  "description": "Explicitly toggle automatic approval for supported Codex permission requests.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fuliucansheng/codex-auto-approve.git"
+  },
+  "homepage": "https://github.com/fuliucansheng/codex-auto-approve#readme",
+  "keywords": [
+    "codex",
+    "plugin",
+    "permissions",
+    "automation"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "bin": {
+    "codex-auto-approve": "plugins/auto-approve/scripts/auto_approve.js"
+  },
+  "files": [
+    "LICENSE",
+    "README.md",
+    ".agents/plugins/marketplace.json",
+    "plugins/auto-approve/README.md",
+    "plugins/auto-approve/package.json",
+    "plugins/auto-approve/.codex-plugin/plugin.json",
+    "plugins/auto-approve/hooks/hooks.json",
+    "plugins/auto-approve/skills/",
+    "plugins/auto-approve/scripts/auto_approve.js"
+  ]
+}

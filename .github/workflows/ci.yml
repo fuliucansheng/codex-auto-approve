@@ -1,0 +1,34 @@
+name: CI
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        node: [22, 24]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Check generated JavaScript
+        run: |
+          git ls-files --error-unmatch plugins/auto-approve/scripts/auto_approve.js
+          git diff --exit-code -- plugins/auto-approve/scripts/auto_approve.js
+      - run: npm run typecheck
+      - name: Test with an isolated home
+        shell: bash
+        run: |
+          test_home=$(mktemp -d)
+          HOME="$test_home" USERPROFILE="$test_home" npm test
+      - run: git diff --check
