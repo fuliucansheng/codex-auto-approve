@@ -176,7 +176,12 @@ test('packed marketplace resolves a standalone plugin with hooks and skills inta
 });
 
 test('tested tarball passes npm publish --dry-run without credentials', () => {
-  const result = JSON.parse(npm(['publish', tarball, '--dry-run', '--ignore-scripts', '--access', 'public', '--json']));
+  const output = JSON.parse(npm(['publish', tarball, '--dry-run', '--ignore-scripts', '--access', 'public', '--json']));
+  // npm may return a package directly, an array, or an object keyed by package name.
+  const packages = Array.isArray(output) ? output
+    : typeof output.name === 'string' ? [output] : Object.values(output);
+  assert.equal(packages.length, 1, 'dry-run must report exactly one package');
+  const [result] = packages;
   assert.equal(result.name, 'codex-auto-approve');
   assert.equal(result.version, packed.version);
   assert.deepEqual(result.files.map(({ path }) => path).sort(), expectedFiles);
