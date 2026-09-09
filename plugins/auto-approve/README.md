@@ -1,30 +1,40 @@
 # Auto Approve
 
-Auto Approve is a Codex plugin that automatically allows supported permission
-requests only while you have explicitly enabled it. It is disabled by default.
-
-## Requirements
-
-- A recent version of Codex with plugin and hook support
-- Node.js 22 or newer, with `node` on `PATH`
+A Codex plugin that automatically allows supported permission requests when
+explicitly enabled. The switch is persistent and **disabled by default**.
 
 ## Install
+
+Requires **Node.js 22 or newer** and a recent **Codex CLI with plugin and hook
+support**, with `node` and `codex` on `PATH`. For one-command installation,
+`npm` and `npx` must also be on `PATH`:
+
+```sh
+npx codex-auto-approve@latest install
+```
+
+The installer requires **version 0.2.0 or newer**. For older versions, use
+these manual commands:
 
 ```sh
 codex plugin marketplace add fuliucansheng/codex-auto-approve
 codex plugin add auto-approve@codex-auto-approve
 ```
 
-The plugin includes the prebuilt `scripts/auto_approve.js` controller and has
-no production dependencies. Marketplace installations run directly with
-Node.js; no `npm install`, build step, `tsx`, or `ts-node` is needed. Keep the
-entire plugin directory, including its local `package.json`, so it also works
-under a parent package configured as an ES module.
+The manual alternative needs no npm installation or build step. Installing the
+npm package alone does not register the plugin. Both methods use the durable
+GitHub marketplace on **`main`**, not an npx cache path. The npm version selects
+only the installer; pinning it does not pin the plugin version or install the
+plugin from the npm tarball.
 
-Start a new Codex conversation after installation and inspect the bundled
-`PermissionRequest` hook with `/hooks`.
+Installation **does not enable automatic approval** or change the existing
+switch: a missing switch stays disabled, and an enabled switch stays enabled.
+Restart Codex and start a **new conversation**, then inspect the hook with
+`/hooks`.
 
-## Use inside Codex
+## Use
+
+In Codex, select the skill by typing `$` or through `/skills`:
 
 ```text
 $auto-approve status
@@ -32,32 +42,37 @@ $auto-approve enable
 $auto-approve disable
 ```
 
-Type `$` to select the skill, or select it through `/skills`. This is a plugin
-skill rather than a new built-in slash command.
+`status` shows the current switch, `enable` allows supported requests
+automatically, and `disable` restores the normal approval flow. This is a
+plugin skill, not a built-in slash command. For terminal controls, see the
+[root README](https://github.com/fuliucansheng/codex-auto-approve#use).
 
-> [!WARNING]
-> While enabled, all supported permission requests are allowed without the
-> normal confirmation prompt. Only enable it in an environment you trust.
+## Update and uninstall
 
-The hook covers permission requests exposed to Codex lifecycle hooks,
-including supported shell, file-edit, and MCP tool requests. Some Computer Use
-and app-level confirmations cannot be auto-approved by this plugin.
+To update, run these commands and start a new Codex conversation:
 
-The switch remains at `~/.local/state/codex-auto-approve/enabled.json` and is
-compatible with existing state files. Only the boolean `true` in an object's
-`enabled` field enables approval. Missing, unreadable, malformed, or non-object
-state fails closed; malformed or non-object hook input silently does nothing.
-Only explicit enable writes state, and disable is safe to repeat. On POSIX
-filesystems, new state directories use `0700` and the file uses `0600`.
+```sh
+codex plugin marketplace upgrade codex-auto-approve
+codex plugin add auto-approve@codex-auto-approve
+```
 
-`status` exits 0 when enabled and 1 when disabled. Successful enable/disable
-actions exit 0, filesystem write failures exit 1, and invalid arguments exit 2.
+Updating the npm CLI alone does not update the installed plugin.
 
-## Development
+To uninstall, run `$auto-approve disable` in Codex first, then in your terminal:
 
-In a repository clone, edit `src/auto_approve.ts`, then run `npm ci`,
-`npm run build`, `npm run typecheck`, and `npm test` from the repository root.
-Include the regenerated `plugins/auto-approve/scripts/auto_approve.js` with
-source changes. Tests execute the compiled controller with isolated temporary
-`HOME` and `USERPROFILE` directories. CI checks Node.js 22/24 on Linux/macOS
-and verifies that the checked-in JavaScript matches the TypeScript source.
+```sh
+codex plugin remove auto-approve@codex-auto-approve
+codex plugin marketplace remove codex-auto-approve
+```
+
+## Safety
+
+While enabled, all supported permission requests are allowed without the normal
+confirmation prompt. Enable only in an environment you trust and disable when
+finished. Some Computer Use and app-level confirmations still require user
+approval, and managed workspace policy may limit what the plugin can approve.
+
+The switch is stored at `~/.local/state/codex-auto-approve/enabled.json`.
+Missing, unreadable, or invalid state leaves automatic approval disabled.
+
+[Contributing](https://github.com/fuliucansheng/codex-auto-approve/blob/main/docs/MAINTAINING.md)

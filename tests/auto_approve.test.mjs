@@ -31,7 +31,7 @@ const enableOutput = 'Auto Approve: enabled (all supported permission requests a
 const disableOutput = 'Auto Approve: disabled (Codex will request approval normally).\n';
 const disabledOutput = 'Auto Approve: disabled\n';
 const enabledOutput = 'Auto Approve: enabled\n';
-const usageOutput = 'Usage: auto_approve.js {enable|disable|status}\n';
+const usageOutput = 'Usage: codex-auto-approve {install|enable|disable|status}\n';
 const posix = process.platform !== 'win32';
 const permissionChecks = posix && process.getuid?.() !== 0;
 
@@ -48,6 +48,8 @@ function fixture(t) {
     ...process.env,
     HOME: home,
     USERPROFILE: home,
+    CODEX_HOME: join(home, '.codex'),
+    XDG_CONFIG_HOME: join(home, '.config'),
     PATH: `${dirname(process.execPath)}${delimiter}${process.env.PATH ?? ''}`,
     NODE_OPTIONS: '',
     NODE_PATH: '',

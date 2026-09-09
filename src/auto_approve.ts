@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Source: src/auto_approve.ts. Rebuild with npm run build; do not edit the JS.
 
+import { spawnSync } from 'node:child_process';
 import { chmodSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
 import type { PathOrFileDescriptor } from 'node:fs';
 import { homedir } from 'node:os';
@@ -52,6 +53,33 @@ function status(): number {
   return enabled ? 0 : 1;
 }
 
+function install(): number {
+  // Keep the marketplace source durable; an npx cache path can disappear.
+  const commands = [
+    ['plugin', 'marketplace', 'add', 'fuliucansheng/codex-auto-approve'],
+    ['plugin', 'add', 'auto-approve@codex-auto-approve'],
+  ];
+  for (const args of commands) {
+    const result = spawnSync('codex', args, { stdio: 'inherit' });
+    if (result.error) {
+      if ('code' in result.error && result.error.code === 'ENOENT') {
+        throw new Error('codex executable not found. Install the Codex CLI with plugin support and ensure codex is on PATH, then retry.');
+      }
+      throw result.error;
+    }
+    if (result.signal) {
+      throw new Error(`codex ${args.join(' ')} terminated by signal ${result.signal}`);
+    }
+    if (result.status === null) {
+      throw new Error(`codex ${args.join(' ')} exited without a status`);
+    }
+    if (result.status !== 0) return result.status;
+  }
+  console.log('Auto Approve: plugin installed. Automatic approval state is unchanged.');
+  console.log('Restart Codex and start a new conversation to load the plugin.');
+  return 0;
+}
+
 function runHook(): number {
   const event = readObject(0);
   if (event?.hook_event_name !== 'PermissionRequest' || !isEnabled()) {
@@ -71,7 +99,7 @@ function runHook(): number {
 }
 
 function usage(): number {
-  console.error('Usage: auto_approve.js {enable|disable|status}');
+  console.error('Usage: codex-auto-approve {install|enable|disable|status}');
   return 2;
 }
 
@@ -80,6 +108,8 @@ function main(): number {
   const command = process.argv[2];
   try {
     switch (command) {
+      case 'install':
+        return install();
       case 'enable':
         enable();
         return 0;
