@@ -1,6 +1,6 @@
 {
   "name": "auto-approve",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Explicitly toggle automatic approval for supported Codex permission requests.",
   "author": {
     "name": "fuliucansheng",

@@ -2,6 +2,7 @@
 "use strict";
 // Source: src/auto_approve.ts. Rebuild with npm run build; do not edit the JS.
 Object.defineProperty(exports, "__esModule", { value: true });
+const node_child_process_1 = require("node:child_process");
 const node_fs_1 = require("node:fs");
 const node_os_1 = require("node:os");
 const node_path_1 = require("node:path");
@@ -47,6 +48,33 @@ function status() {
     console.log(`Auto Approve: ${enabled ? 'enabled' : 'disabled'}`);
     return enabled ? 0 : 1;
 }
+function install() {
+    // Keep the marketplace source durable; an npx cache path can disappear.
+    const commands = [
+        ['plugin', 'marketplace', 'add', 'fuliucansheng/codex-auto-approve'],
+        ['plugin', 'add', 'auto-approve@codex-auto-approve'],
+    ];
+    for (const args of commands) {
+        const result = (0, node_child_process_1.spawnSync)('codex', args, { stdio: 'inherit' });
+        if (result.error) {
+            if ('code' in result.error && result.error.code === 'ENOENT') {
+                throw new Error('codex executable not found. Install the Codex CLI with plugin support and ensure codex is on PATH, then retry.');
+            }
+            throw result.error;
+        }
+        if (result.signal) {
+            throw new Error(`codex ${args.join(' ')} terminated by signal ${result.signal}`);
+        }
+        if (result.status === null) {
+            throw new Error(`codex ${args.join(' ')} exited without a status`);
+        }
+        if (result.status !== 0)
+            return result.status;
+    }
+    console.log('Auto Approve: plugin installed. Automatic approval state is unchanged.');
+    console.log('Restart Codex and start a new conversation to load the plugin.');
+    return 0;
+}
 function runHook() {
     const event = readObject(0);
     if (event?.hook_event_name !== 'PermissionRequest' || !isEnabled()) {
@@ -66,7 +94,7 @@ function runHook() {
     return 0;
 }
 function usage() {
-    console.error('Usage: auto_approve.js {enable|disable|status}');
+    console.error('Usage: codex-auto-approve {install|enable|disable|status}');
     return 2;
 }
 function main() {
@@ -75,6 +103,8 @@ function main() {
     const command = process.argv[2];
     try {
         switch (command) {
+            case 'install':
+                return install();
             case 'enable':
                 enable();
                 return 0;

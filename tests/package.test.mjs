@@ -6,6 +6,8 @@ import { tmpdir } from 'node:os';
 import { delimiter, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { assertInstallSuccess, installFixture, posix } from './helpers/install.mjs';
+
 const repository = fileURLToPath(new URL('../', import.meta.url));
 const pluginPath = 'plugins/auto-approve';
 const binPath = `${pluginPath}/scripts/auto_approve.js`;
@@ -24,7 +26,7 @@ mkdirSync(home);
 const env = Object.fromEntries(Object.entries(process.env).filter(([key]) =>
   !/^npm_/i.test(key) && !/^(NODE_AUTH_TOKEN|NODE_OPTIONS|NODE_PATH)$/i.test(key)));
 Object.assign(env, {
-  HOME: home, USERPROFILE: home, NODE_OPTIONS: '', NODE_PATH: '',
+  HOME: home, USERPROFILE: home, CODEX_HOME: join(home, '.codex'), XDG_CONFIG_HOME: join(home, '.config'), NODE_OPTIONS: '', NODE_PATH: '',
   PATH: [dirname(process.execPath), ...(process.platform === 'win32'
     ? (process.env.PATH ?? '').split(delimiter).filter((path) => !path.includes('node_modules'))
     : ['/usr/bin', '/bin'])].join(delimiter),
@@ -186,3 +188,11 @@ test('tested tarball passes npm publish --dry-run without credentials', () => {
   assert.equal(result.version, packed.version);
   assert.deepEqual(result.files.map(({ path }) => path).sort(), expectedFiles);
 });
+
+for (const enabled of [false, true]) {
+  test(`packed executable installs the GitHub marketplace without changing state (enabled=${enabled})`, { skip: !posix }, (t) => {
+    const f = installFixture(t, enabled);
+    const bin = join(prefix, 'bin/codex-auto-approve');
+    assertInstallSuccess(f, f.run(bin, ['install']));
+  });
+}
