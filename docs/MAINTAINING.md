@@ -35,6 +35,10 @@ without invoking a real Codex installation. Package tests check exact tarball
 contents, metadata, executable mode, version parity, and absence of source,
 developer scripts, and runtime dependencies.
 Only `prepack` rebuilds (`npm run build`); it never runs tests, avoiding recursion.
+The test runner serializes test files with `--test-concurrency=1` because package
+tests run `npm pack`, whose `prepack` rebuilds the shared controller JavaScript.
+This prevents controller and installer process tests from executing a partially
+written file during compilation.
 Package tests use empty temporary npm configs and a separate cache as well as
 an isolated home. Release validator behavior tests cover matching versions,
 mismatches, malformed tags, and rejection of prereleases.

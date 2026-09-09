@@ -7,7 +7,8 @@ import { fileURLToPath } from 'node:url';
 const home = mkdtempSync(join(tmpdir(), 'codex-auto-approve-suite-'));
 try {
   const result = spawnSync(process.execPath, [
-    '--test', '--test-reporter=spec', ...process.argv.slice(2),
+    // npm pack rebuilds shared controller JS; serialize files to avoid partial reads.
+    '--test', '--test-concurrency=1', '--test-reporter=spec', ...process.argv.slice(2),
     ...['auto_approve', 'install', 'package', 'release-version'].map((name) =>
       fileURLToPath(new URL(`../tests/${name}.test.mjs`, import.meta.url))),
   ], {
