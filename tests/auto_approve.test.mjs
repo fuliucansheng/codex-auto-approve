@@ -411,8 +411,9 @@ test('the skill resolves the bundled Node controller and retains explicit opt-in
   assert.equal(existsSync(f.stateDirectory), false);
 });
 
-test('the shipped plugin is version 0.1.1 and has no legacy controller', () => {
+test('the shipped plugin matches the root version and has no legacy controller', () => {
   const manifest = JSON.parse(readFileSync(join(plugin, '.codex-plugin', 'plugin.json'), 'utf8'));
-  assert.equal(manifest.version, '0.1.1');
+  const root = JSON.parse(readFileSync(join(repository, 'package.json'), 'utf8'));
+  assert.equal(manifest.version, root.version);
   assert.equal(existsSync(join(plugin, 'scripts', 'auto_approve.py')), false);
 });

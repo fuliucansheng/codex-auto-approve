@@ -8,7 +8,8 @@ const home = mkdtempSync(join(tmpdir(), 'codex-auto-approve-suite-'));
 try {
   const result = spawnSync(process.execPath, [
     '--test', '--test-reporter=spec', ...process.argv.slice(2),
-    fileURLToPath(new URL('../tests/auto_approve.test.mjs', import.meta.url)),
+    ...['auto_approve', 'package', 'release-version'].map((name) =>
+      fileURLToPath(new URL(`../tests/${name}.test.mjs`, import.meta.url))),
   ], {
     env: { ...process.env, HOME: home, USERPROFILE: home },
     stdio: 'inherit',
